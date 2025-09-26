@@ -54,9 +54,9 @@ public class CategoryServiceImpl implements ICategoryService {
         Optional<Category> categoryById = categoryRepository.findById(id);
 
         if(categoryById.isPresent()){
-            Category category = categoryById.get();
+//            Category category = categoryById.get();
             CategoryDTO categoryDTO = new CategoryDTO();
-            categoryDTO.setCategoryName(category.getCategoryName());
+            categoryDTO.setCategoryName(categoryById.get().getCategoryName());
             return categoryDTO;
         }
         return null;
