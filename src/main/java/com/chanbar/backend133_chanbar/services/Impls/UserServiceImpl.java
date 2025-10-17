@@ -3,16 +3,22 @@ package com.chanbar.backend133_chanbar.services.Impls;
 import com.chanbar.backend133_chanbar.DTOs.request.LoginRequestDTO;
 import com.chanbar.backend133_chanbar.DTOs.request.RegistrationDTO;
 import com.chanbar.backend133_chanbar.DTOs.response.LoginResponseDTO;
+import com.chanbar.backend133_chanbar.exceptions.BaseException;
+import com.chanbar.backend133_chanbar.exceptions.ErrorsType;
 import com.chanbar.backend133_chanbar.models.User;
 import com.chanbar.backend133_chanbar.repositories.UserRepository;
 import com.chanbar.backend133_chanbar.security.JwtService;
 import com.chanbar.backend133_chanbar.services.IUserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements IUserService {
@@ -34,7 +40,7 @@ public class UserServiceImpl implements IUserService {
             userRepository.save(user);
 
         } catch (Exception e) {
-            throw new RuntimeException("Qeydiyyat zamanı xəta baş verdi: " + e.getMessage());
+            throw new BaseException(ErrorsType.INVALID_DATA, e.getMessage());
         }
 
     }
@@ -48,10 +54,19 @@ public class UserServiceImpl implements IUserService {
                 )
         );
 
-        User user = userRepository.findByEmail(loginRequestDTO.getEmail())
-                .orElseThrow(() -> new RuntimeException("İstifadəçi tapılmadı"));
+        Optional<User> user = userRepository.findByEmail(loginRequestDTO.getEmail());
 
-        String token = jwtService.generateToken(user);
-        return new LoginResponseDTO(token);
+        try{
+            if (user.isPresent()){
+                String token = jwtService.generateToken(user);
+                log.info("Token was created succesfully");
+                return new LoginResponseDTO(token);
+            }
+        } catch (Exception e) {
+            log.error("Not found this user:{}",loginRequestDTO.getEmail());
+            throw new RuntimeException(e);
+        }
+        return null;
+
     }
 }

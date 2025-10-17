@@ -3,10 +3,12 @@ package com.chanbar.backend133_chanbar.controllers;
 import com.chanbar.backend133_chanbar.DTOs.CategoryDTO;
 import com.chanbar.backend133_chanbar.services.ICategoryService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/categories")
@@ -15,7 +17,10 @@ public class CategoryController {
     private final ICategoryService categoryService;
 
     @PostMapping()
-    CategoryDTO createCategory(@RequestBody CategoryDTO categoryDTO){ return categoryService.createCategory(categoryDTO);};
+    CategoryDTO createCategory(@RequestBody CategoryDTO categoryDTO){
+        log.info("Category create: {}",categoryDTO.getCategoryName());
+        return categoryService.createCategory(categoryDTO);
+    }
 
     @GetMapping()
     List<CategoryDTO> getAllCategories(){
